@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Sentiment Analyzer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="glow-text">AI Text Sentiment Analyzer</h1>
+            <p class="subtitle">Type below to see the AI analyze your sentence's emotional tone in real-time.</p>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+            <!-- Left Panel: Input & Examples -->
+            <section class="panel-left">
+                <div class="card glassmorphism main-input-card">
+                    <div class="card-header">
+                        <h2><i class="fa-regular fa-keyboard"></i> Enter Your Sentence</h2>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="text-input" placeholder="Type your sentence here to analyze its sentiment..."></textarea>
+                    </div>
+                </div>
+
+                <div class="card glassmorphism examples-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Try these examples</h2>
+                    </div>
+                    <div class="card-body example-buttons">
+                        <button class="btn-example btn-pos" data-text="I love this product! It is absolutely amazing, wonderful, and beautiful.">
+                            <span class="dot pos-dot"></span> Positive Example
+                        </button>
+                        <button class="btn-example btn-neg" data-text="This is the worst experience ever. I hate the terrible customer support and poor service.">
+                            <span class="dot neg-dot"></span> Negative Example
+                        </button>
+                        <button class="btn-example btn-mix" data-text="The food was terrible and bad, but the server was very friendly and nice.">
+                            <span class="dot mix-dot"></span> Mixed Example
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results & Dictionary -->
+            <section class="panel-right">
+                <!-- Sentiment Visualizer Card -->
+                <div class="card glassmorphism result-card">
+                    <div class="result-header">
+                        <div class="mood-badge" id="mood-badge">
+                            <span class="emoji-indicator" id="emoji-indicator">😐</span>
+                            <span class="status-label" id="status-label">READY</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-body">
+                        <!-- SVG Circular Gauge -->
+                        <div class="gauge-container">
+                            <svg class="gauge-svg" viewBox="0 0 120 120">
+                                <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="gauge-progress" cx="60" cy="60" r="50" id="progress-circle"></circle>
+                            </svg>
+                            <div class="gauge-text-container">
+                                <span class="gauge-percentage" id="gauge-percentage">0%</span>
+                                <span class="gauge-sub" id="gauge-sub">Sentiment Ratio</span>
+                            </div>
+                        </div>
+
+                        <!-- Numeric Stats Row -->
+                        <div class="stats-row">
+                            <div class="stat-box pos-stat">
+                                <span class="stat-val" id="pos-count">0</span>
+                                <span class="stat-lbl">Positive Words</span>
+                            </div>
+                            <div class="stat-box neg-stat">
+                                <span class="stat-val" id="neg-count">0</span>
+                                <span class="stat-lbl">Negative Words</span>
+                            </div>
+                            <div class="stat-box total-stat">
+                                <span class="stat-val" id="total-count">0</span>
+                                <span class="stat-lbl">Total Words</span>
+                            </div>
+                        </div>
+
+                        <!-- Matched Word Helper -->
+                        <div class="matches-container" id="matches-container">
+                            <p class="matches-placeholder">Type something to begin analysis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dictionary Manager Card -->
+                <div class="card glassmorphism lexicon-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-book-open"></i> Lexicon Word Manager</h2>
+                        <span class="dict-sub">Customize recognized sentiment words</span>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <div class="tabs-container">
+                        <button class="tab-btn active" data-tab="positive"><i class="fa-solid fa-circle-plus text-pos"></i> Positive List</button>
+                        <button class="tab-btn" data-tab="negative"><i class="fa-solid fa-circle-minus text-neg"></i> Negative List</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-contents">
+                        <!-- Positive list listbox -->
+                        <div class="tab-content active" id="tab-positive">
+                            <div class="word-list-scroller" id="pos-word-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- Negative list listbox -->
+                        <div class="tab-content" id="tab-negative">
+                            <div class="word-list-scroller" id="neg-word-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add word panel -->
+                    <div class="add-word-form">
+                        <input type="text" id="new-word-input" placeholder="Add custom word...">
+                        <button class="btn-add-word" id="btn-add-pos" title="Add as Positive"><i class="fa-solid fa-plus"></i> Positive</button>
+                        <button class="btn-add-word" id="btn-add-neg" title="Add as Negative"><i class="fa-solid fa-minus"></i> Negative</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Made with ❤️ by <a href="https://github.com/dhanish0711/" target="_blank">Dhanish Ladwani</a></p>
+        </footer>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
