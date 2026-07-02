@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 import json
-import os
 import re
+from pathlib import Path
 
 app = Flask(__name__)
 
-LEXICON_FILE = "lexicon.json"
+LEXICON_FILE = Path(__file__).with_name("lexicon.json")
 
 DEFAULT_LEXICON = {
     "positive": [
@@ -85,9 +85,9 @@ DEFAULT_LEXICON = {
 
 def load_lexicon():
     """Loads the lexicon from file or returns default lexicon."""
-    if os.path.exists(LEXICON_FILE):
+    if LEXICON_FILE.exists():
         try:
-            with open(LEXICON_FILE, "r", encoding="utf-8") as f:
+            with LEXICON_FILE.open("r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading lexicon file: {e}. Falling back to default.")
@@ -100,7 +100,7 @@ def load_lexicon():
 def save_lexicon(lexicon):
     """Saves the lexicon to a JSON file."""
     try:
-        with open(LEXICON_FILE, "w", encoding="utf-8") as f:
+        with LEXICON_FILE.open("w", encoding="utf-8") as f:
             json.dump(lexicon, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving lexicon file: {e}")
@@ -227,6 +227,7 @@ def remove_word():
     data = request.get_json() or {}
     word = data.get("word", "").strip().lower()
     is_positive = data.get("is_positive", True)
+    word = re.sub(r'[^\w]', '', word)
 
     target_key = "positive" if is_positive else "negative"
 
